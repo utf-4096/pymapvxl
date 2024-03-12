@@ -1,0 +1,3 @@
+[submodule "extern/libmapvxl"]
+	path = extern/libmapvxl
+	url = https://github.com/SpadesX/libmapvxl
