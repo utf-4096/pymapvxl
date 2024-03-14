@@ -1,6 +1,7 @@
 # cython: language_level=3
 
 from libmapvxl_h cimport *
+from libc.stdlib cimport malloc, realloc
 
 class InvalidTypeException(Exception):
     """The given type is not valid for this call"""
@@ -13,6 +14,13 @@ class InvalidPositionException(Exception):
 cdef class VoxelMap:
     cdef mapvxl_t _map
 
+    @staticmethod
+    def from_file(str path):
+        vxl = VoxelMap()
+        with open(path, 'rb') as f:
+            vxl.load(f.read())
+        return vxl
+
     def __cinit__(self, width = 512, height = 512, depth = 64):
         """Initiate a blank libmapvxl map"""
         mapvxl_create(&self._map, width, height, depth)
@@ -20,6 +28,24 @@ cdef class VoxelMap:
     def __dealloc__(self):
         """Free the libmapvxl instance"""
         mapvxl_free(&self._map)
+
+    cpdef void load(self, uint8_t* data):
+        """Load a map from a VXL data buffer"""
+        mapvxl_read(&self._map, data)
+
+    cpdef bytes dump(self):
+        """Output the map as a VXL data buffer"""
+        cdef size_t size = self._map.size_x * self._map.size_y * (self._map.size_z // 2) * 8
+        cdef uint8_t* data = <uint8_t*> malloc(sizeof(uint8_t) * size)
+        size = mapvxl_write(&self._map, data)
+        data = <uint8_t*> realloc(data, size)
+        return data[:size]
+
+    cpdef void to_file(self, str path):
+        """Write the map to a VXL file"""
+        data = self.dump()
+        with open(path, 'wb') as f:
+            f.write(data)
 
     cdef void _check_is_valid_position(self, tuple position):
         """Check if a position is a valid XYZ position, and is not out of bounds"""
