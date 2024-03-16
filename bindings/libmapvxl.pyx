@@ -31,7 +31,10 @@ cdef class VoxelMap:
 
     cpdef bytes dump(self):
         """Output the map as a VXL data buffer"""
-        cdef size_t size = self._map.size_x * self._map.size_y * (self._map.size_z // 2) * 8
+        cdef size_t size = self._map.size_x * \
+                           self._map.size_y * \
+                           (self._map.size_z // 2) * 8
+
         cdef uint8_t* data = <uint8_t*> malloc(sizeof(uint8_t) * size)
         size = mapvxl_write(&self._map, data)
         data = <uint8_t*> realloc(data, size)
