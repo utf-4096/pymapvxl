@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel", "Cython"]
+
+[tool.setuptools]
+py-modules = []
+
+[project]
+name = "pymapvxl"
+description = "Python wrapper for libmapvxl"
+
+authors = [
+	{ name = "utf", email = "ga5zxy3j-utf-pypi@riseup.net" },
+]
+
+readme = "README.md"
+license = { text = "MIT" }
+
+classifiers = [
+	"Programming Language :: Python :: 3"
+]
+
+requires-python = ">=3.9"
+dependencies = [
+	"Cython==3.0.9",
+]
+
+dynamic = ["version"]

@@ -9,9 +9,5 @@ SOURCES = [
 extension = Extension('libmapvxl', SOURCES)
 
 setup(
-    name='pymapvxl',
-    version='0.1.0',
-    description='Python wrapper for libmapvxl',
-    author='utf',
     ext_modules = cythonize([extension]),
 )
