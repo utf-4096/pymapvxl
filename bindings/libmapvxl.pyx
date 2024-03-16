@@ -3,10 +3,6 @@
 from libmapvxl_h cimport *
 from libc.stdlib cimport malloc, realloc
 
-class InvalidTypeException(Exception):
-    """The given type is not valid for this call"""
-    pass
-
 class InvalidPositionException(Exception):
     """The given XYZ position is invalid"""
     pass
@@ -47,68 +43,41 @@ cdef class VoxelMap:
         with open(path, 'wb') as f:
             f.write(data)
 
-    cdef void _check_is_valid_position(self, tuple position):
+    cdef void _check_is_valid_position(self, uint32_t x, uint32_t y, uint32_t z):
         """Check if a position is a valid XYZ position, and is not out of bounds"""
-        if not isinstance(position, tuple) or \
-           len(position) != 3 or \
-           not isinstance(position[0], int) or \
-           not isinstance(position[1], int) or \
-           not isinstance(position[2], int):
-            raise InvalidTypeException('expected position to be an int tuple(x, y, z)')
-
-        x, y, z = position
         if x >= self._map.size_x or \
            y >= self._map.size_y or \
            z >= self._map.size_z or \
            x < 0 or y < 0 or z < 0:
            raise InvalidPositionException('Invalid position')
 
-    cpdef void place(self, tuple position, uint32_t color = 0x674028):
+    cpdef void place(self, uint32_t x, uint32_t y, uint32_t z, uint32_t color = 0x674028):
         """Place a block with an optional color"""
-        self._check_is_valid_position(position)
-        if not isinstance(color, int):
-            raise Exception('expected color to be an RRGGBB int')
-
-        x, y, z = position
+        self._check_is_valid_position(x, y, z)
         mapvxl_set_color(&self._map, x, y, z, color | 0xFF000000)
 
-    cpdef uint32_t get_color(self, tuple position):
+    cpdef uint32_t get_color(self, uint32_t x, uint32_t y, uint32_t z):
         """Get the color of a block"""
-        self._check_is_valid_position(position)
-
-        x, y, z = position
+        self._check_is_valid_position(x, y, z)
         return mapvxl_get_color(&self._map, x, y, z) & 0x00FFFFFF
 
-    cpdef void remove(self, tuple position):
+    cpdef void remove(self, uint32_t x, uint32_t y, uint32_t z):
         """Remove a block"""
-        self._check_is_valid_position(position)
-
-        x, y, z = position
+        self._check_is_valid_position(x, y, z)
         mapvxl_set_air(&self._map, x, y, z)
 
-    cpdef bint is_solid(self, tuple position):
+    cpdef bint is_solid(self, uint32_t x, uint32_t y, uint32_t z):
         """Check if a block exists"""
-        self._check_is_valid_position(position)
-
-        x, y, z = position
+        self._check_is_valid_position(x, y, z)
         return bool(mapvxl_is_solid(&self._map, x, y, z))
 
-    cpdef bint is_surface(self, tuple position):
+    cpdef bint is_surface(self, uint32_t x, uint32_t y, uint32_t z):
         """Check if there is a solid surface"""
-        self._check_is_valid_position(position)
-
-        x, y, z = position
+        self._check_is_valid_position(x, y, z)
         return bool(mapvxl_is_surface(&self._map, x, y, z))
 
-    cpdef uint8_t get_top_block(self, tuple position):
+    cpdef uint8_t get_top_block(self, uint32_t x, uint32_t y):
         """Get the top block of the map at the specified (x, y) position"""
-        if not isinstance(position, tuple) or \
-           len(position) != 2 or \
-           not isinstance(position[0], int) or \
-           not isinstance(position[1], int):
-            raise Exception('expected position to be an int tuple(x, y)')
-
-        x, y = position
         return mapvxl_find_top_block(&self._map, x, y)
 
     @property
